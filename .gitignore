@@ -1,0 +1,129 @@
+############################################
+# Java / Spring Boot
+############################################
+target/
+build/
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+hs_err_pid*
+
+############################################
+# Maven / Gradle
+############################################
+.mvn/timing.properties
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+.mvn/wrapper/maven-wrapper.jar
+
+############################################
+# Logs
+############################################
+*.log
+logs/
+spring.log
+
+############################################
+# Environment & Secrets
+############################################
+.env
+.env.*
+*.pem
+*.key
+*.crt
+secrets.yml
+application-secret.properties
+application-secrets.yml
+
+############################################
+# IntelliJ / Eclipse / VS Code
+############################################
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.vscode/
+
+############################################
+# OS Files
+############################################
+.DS_Store
+Thumbs.db
+desktop.ini
+
+############################################
+# Docker
+############################################
+**/.dockerignore
+docker-compose.override.yml
+docker-data/
+volumes/
+containers/
+*.pid
+
+############################################
+# GitHub Actions – Local Self Hosted Runner
+############################################
+actions-runner/
+_runner/
+*.runner
+*.env.runner
+work/
+.diag/
+svc.sh
+run.sh
+config.sh
+
+############################################
+# Gatling
+############################################
+gatling/target/
+gatling/results/
+gatling/bin/
+*.simulation.log
+
+############################################
+# Karate
+############################################
+**/karate-reports/
+**/karate.log
+**/*.feature.log
+
+############################################
+# Test Artifacts
+############################################
+test-results/
+surefire-reports/
+failsafe-reports/
+*.exec
+
+############################################
+# Databases / Local Volumes
+############################################
+mysql-data/
+postgres-data/
+redis-data/
+*.sqlite
+*.db
+
+############################################
+# Node (if frontend/tools present)
+############################################
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+############################################
+# Temporary & Backup Files
+############################################
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
