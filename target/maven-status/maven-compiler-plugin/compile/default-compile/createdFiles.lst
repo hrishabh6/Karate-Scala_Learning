@@ -1,0 +1,6 @@
+com/example/loadtest/controllers/ProductController.class
+com/example/loadtest/model/Product$ProductBuilder.class
+com/example/loadtest/service/ProductService.class
+com/example/loadtest/model/Product.class
+com/example/loadtest/repository/ProductRepository.class
+com/example/loadtest/LoadtestApplication.class
