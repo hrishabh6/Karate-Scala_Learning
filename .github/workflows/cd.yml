@@ -1,0 +1,53 @@
+name: CD - Deploy to VM
+
+on:
+  workflow_run:
+    workflows: ["CI - Build & Test"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ✅ Setup SSH automatically
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
+      # ✅ Copy docker-compose to VM automatically
+      - name: Copy docker-compose to VM
+        run: |
+          scp docker-compose.prod.yml \
+          ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/home/${{ secrets.VM_USER }}/docker-compose.yml
+
+      # ✅ Deploy Automatically
+      - name: Deploy Using Docker Compose
+        run: |
+          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
+
+          export DB_USER=${{ secrets.DB_USER }}
+          export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          export DB_NAME=${{ secrets.DB_NAME }}
+
+          echo "✅ Logging into GHCR"
+          docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
+          echo "✅ Pulling latest image"
+          docker pull ghcr.io/hrishabh6/karate-scala_learning/springboot-crud:latest
+
+          echo "✅ Starting deployment"
+          docker compose down
+          docker compose up -d
+
+          echo "✅ Cleaning unused images"
+          docker image prune -f
+
+          EOF
