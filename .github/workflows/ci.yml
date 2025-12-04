@@ -6,9 +6,13 @@ on:
   pull_request:
     branches: [ main ]
 
+# Required for pushing to GHCR
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-test:
-    # use the self-hosted runner you just registered
     runs-on: self-hosted
 
     steps:
@@ -28,5 +32,22 @@ jobs:
       - name: Build Spring Boot jar
         run: mvn -B -DskipTests -Dgatling.skip=true package
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build Docker image
-        run: docker build -t springboot-crud:${{ github.sha }} .
+        run: |
+          IMAGE_NAME=ghcr.io/hrishabh6/karate-scala_learning/springboot-crud
+          TAG=${{ github.sha }}
+          docker build -t $IMAGE_NAME:$TAG .
+          docker tag $IMAGE_NAME:$TAG $IMAGE_NAME:latest
+
+      - name: Push Docker image to GHCR
+        run: |
+          IMAGE_NAME=ghcr.io/hrishabh6/karate-scala_learning/springboot-crud
+          docker push $IMAGE_NAME:${{ github.sha }}
+          docker push $IMAGE_NAME:latest
