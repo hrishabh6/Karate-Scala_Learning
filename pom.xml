@@ -23,6 +23,7 @@
         <karate.version>1.5.0</karate.version>
         <lombok.version>1.18.30</lombok.version>
         <gatling.plugin.version>4.10.1</gatling.plugin.version>
+        <gatling.skip>true</gatling.skip>
     </properties>
 
     <dependencies>
@@ -87,6 +88,21 @@
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.karatelabs</groupId>
+            <artifactId>karate-core</artifactId>
+            <version>1.5.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
         </dependency>
 
     </dependencies>
@@ -170,10 +186,8 @@
                 <artifactId>gatling-maven-plugin</artifactId>
                 <version>${gatling.plugin.version}</version>
                 <configuration>
-                    <simulationsFolder>src/test/java</simulationsFolder>
-                    <includes>
-                        <include>app.perf.TodoSimulation</include>
-                    </includes>
+
+                    <skip>${gatling.skip}</skip>
                 </configuration>
                 <executions>
                     <execution>

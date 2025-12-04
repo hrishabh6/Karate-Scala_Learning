@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ main ]
 
-# Required for pushing to GHCR
 permissions:
   contents: read
   packages: write
@@ -26,11 +25,13 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
+      # ✅ TESTS ON H2
       - name: Run Maven tests (Karate, unit tests)
-        run: mvn -B -Dgatling.skip=true test
+        run: mvn -B -Dspring.profiles.active=test -Dgatling.skip=true test
 
+      # ✅ PROD BUILD
       - name: Build Spring Boot jar
-        run: mvn -B -DskipTests -Dgatling.skip=true package
+        run: mvn -B -DskipTests -Dspring.profiles.active=prod -Dgatling.skip=true package
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
