@@ -8,17 +8,13 @@ on:
 
 jobs:
   deploy:
-    # ✅ Only deploy if CI succeeded
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    environment: prod
-
     runs-on: self-hosted
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ✅ Setup SSH
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -26,32 +22,36 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
 
-      # ✅ Copy docker-compose to VM
+      - name: Debug VM Vars
+        run: |
+          echo "VM_USER=${{ secrets.VM_USER }}"
+          echo "VM_HOST=${{ secrets.VM_HOST }}"
+
       - name: Copy docker-compose to VM
         run: |
           scp docker-compose.prod.yml \
           ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/home/${{ secrets.VM_USER }}/docker-compose.yml
 
-      # ✅ Deploy on VM (NO GitHub token usage here)
       - name: Deploy Using Docker Compose
         run: |
-          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
+          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << EOF
+            set -e
 
-          set -e
+            export DB_USER=${{ secrets.DB_USER }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            export DB_NAME=${{ secrets.DB_NAME }}
 
-          export DB_USER=${{ secrets.DB_USER }}
-          export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          export DB_NAME=${{ secrets.DB_NAME }}
+            echo "🔐 Logging into GHCR"
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
 
-          echo "✅ Pulling latest image"
-          docker pull ghcr.io/hrishabh6/karate-scala_learning/springboot-crud:latest
+            echo "✅ Pulling latest image"
+            docker pull ghcr.io/hrishabh6/karate-scala_learning/springboot-crud:latest
 
-          echo "✅ Starting deployment"
-          cd /home/${{ secrets.VM_USER }}
-          docker compose down
-          docker compose up -d
+            echo "✅ Starting deployment"
+            cd /home/${{ secrets.VM_USER }}
+            docker compose down || true
+            docker compose up -d
 
-          echo "✅ Cleaning unused images"
-          docker image prune -f
-
+            echo "✅ Cleaning unused images"
+            docker image prune -f
           EOF
