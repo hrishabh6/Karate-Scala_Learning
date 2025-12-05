@@ -49,9 +49,10 @@ jobs:
 
             echo "✅ Starting deployment"
             cd /home/${{ secrets.VM_USER }}
-            docker compose down || true
-            docker compose up -d
+            docker-compose down || true
+            docker-compose up -d
 
             echo "✅ Cleaning unused images"
             docker image prune -f
           EOF
+      
