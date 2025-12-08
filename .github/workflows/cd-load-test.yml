@@ -20,6 +20,11 @@ jobs:
           ssh -i ~/.ssh/load_vm_key ${{ secrets.LOAD_VM_USER }}@${{ secrets.LOAD_SERVER_IP }} << 'EOF'
           set -e
 
+          # ✅ Inject GitHub secret into remote VM environment
+          export VM_HOST='${{ secrets.VM_HOST }}'
+
+          echo "🎯 Target App Server: http://$VM_HOST:8080"
+
           echo "📦 Syncing repository on Load VM"
           if [ ! -d "springboot-load" ]; then
             git clone https://github.com/hrishabh6/karate-scala_learning.git springboot-load
@@ -35,7 +40,7 @@ jobs:
           git pull origin main
 
           echo "🚀 Running Gatling Load Test..."
-          mvn -B -Dgatling.skip=false gatling:test -DbaseUrl=http://${VM_HOST}:8080
+          mvn -B -Dgatling.skip=false gatling:test -DbaseUrl=http://$VM_HOST:8080
 
           echo "📦 Locating latest Gatling report..."
           LATEST_RUN_DIR=$(ls -td target/gatling/* | head -1)
@@ -49,8 +54,6 @@ jobs:
           zip -r "$REPORT_NAME" "$LATEST_RUN_DIR"
           echo "✅ Zipped report created: $REPORT_NAME"
           EOF
-        env:
-          VM_HOST: ${{ secrets.VM_HOST }}
 
       - name: Copy Gatling Report from Load VM
         run: |
