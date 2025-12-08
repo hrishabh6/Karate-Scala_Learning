@@ -4,9 +4,15 @@ Background:
   * url baseUrl
   * header Content-Type = 'application/json'
 
-  # ✅ Per-virtual-user product (NOT shared)
-  * def productSetup = call read('create-product.feature')
+  # ✅ Switch behavior based on environment
+  * def isLoad = karate.env == 'load'
+
+  * def productSetup =
+    isLoad ? call read('create-product.feature')
+           : callonce read('create-product.feature')
+
   * def productId = productSetup.productId
+
 
 Scenario: Get all products
   Given path '/api/products'

@@ -40,7 +40,8 @@ jobs:
           git pull origin main
 
           echo "🚀 Running Gatling Load Test..."
-          mvn -B -Dgatling.skip=false gatling:test -DbaseUrl=http://$VM_HOST:8080
+          mvn -B -Dgatling.skip=false gatling:test -DbaseUrl=http://$VM_HOST:8080 -Dkarate.env=load
+
 
           echo "📦 Locating latest Gatling report..."
           # 🟢 Read last run ID from Gatling's pointer file
