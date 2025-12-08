@@ -43,17 +43,21 @@ jobs:
           mvn -B -Dgatling.skip=false gatling:test -DbaseUrl=http://$VM_HOST:8080
 
           echo "📦 Locating latest Gatling report..."
-          LATEST_RUN_DIR=$(ls -td target/gatling/* | head -1)
+          # 🟢 Read last run ID from Gatling's pointer file
+          RUN_ID=$(cat target/gatling/lastRun.txt | tr -d '\n')
+          LATEST_RUN_DIR="target/gatling/$RUN_ID"
 
           TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
           REPORT_NAME="gatling-report-$TIMESTAMP.zip"
 
+          echo "✅ Last run ID: $RUN_ID"
           echo "✅ Latest report directory: $LATEST_RUN_DIR"
           echo "✅ Report name: $REPORT_NAME"
 
           zip -r "$REPORT_NAME" "$LATEST_RUN_DIR"
           echo "✅ Zipped report created: $REPORT_NAME"
           EOF
+      
 
       - name: Copy Gatling Report from Load VM
         run: |

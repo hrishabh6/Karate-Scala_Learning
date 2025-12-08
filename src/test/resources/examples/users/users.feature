@@ -1,9 +1,11 @@
-Feature: Test Product API - CRUD Operations
+Feature: Test Product API - CRUD Operations (Load Safe)
 
 Background:
   * url baseUrl
   * header Content-Type = 'application/json'
-  * def productSetup = callonce read('create-product.feature')
+
+  # ✅ Per-virtual-user product (NOT shared)
+  * def productSetup = call read('create-product.feature')
   * def productId = productSetup.productId
 
 Scenario: Get all products
