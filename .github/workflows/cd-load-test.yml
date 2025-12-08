@@ -17,7 +17,7 @@ jobs:
 
       - name: Run Gatling Load Test on Load VM and Zip Latest Report
         run: |
-          ssh -i ~/.ssh/load_vm_key ${{ secrets.LOAD_VM_USER }}@${{ secrets.LOAD_SERVER_IP }} << 'EOF'
+            ssh -i ~/.ssh/load_vm_key ${{ secrets.LOAD_VM_USER }}@${{ secrets.LOAD_SERVER_IP }} << EOF
             set -e
 
             echo "📦 Syncing repository on Load VM"
