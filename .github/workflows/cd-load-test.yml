@@ -15,9 +15,9 @@ jobs:
           chmod 600 ~/.ssh/load_vm_key
           ssh-keyscan -H ${{ secrets.LOAD_SERVER_IP }} >> ~/.ssh/known_hosts
 
-      - name: Run Gatling Load Test on Load VM
+      - name: Run Gatling Load Test on Load VM and Zip Latest Report
         run: |
-          ssh -i ~/.ssh/load_vm_key ${{ secrets.LOAD_VM_USER }}@${{ secrets.LOAD_SERVER_IP }} << EOF
+          ssh -i ~/.ssh/load_vm_key ${{ secrets.LOAD_VM_USER }}@${{ secrets.LOAD_SERVER_IP }} << 'EOF'
             set -e
 
             echo "📦 Syncing repository on Load VM"
@@ -29,21 +29,32 @@ jobs:
             git pull origin main
 
             echo "🚀 Running Gatling Load Test..."
-            mvn -B gatling:test -DbaseUrl=http://${{ secrets.VM_HOST }}:8080
+            mvn -B -Dgatling.skip=false gatling:test -DbaseUrl=http://${VM_HOST}:8080
 
-            echo "📦 Zipping Gatling reports..."
-            cd target
-            zip -r gatling-report.zip gatling
+            echo "📦 Locating latest Gatling report..."
+            LATEST_RUN_DIR=$(ls -td target/gatling/* | head -1)
+
+            TIMESTAMP=\$(date +"%Y-%m-%d_%H-%M-%S")
+            REPORT_NAME="gatling-report-\$TIMESTAMP.zip"
+
+            echo "✅ Latest report directory: \$LATEST_RUN_DIR"
+            echo "✅ Report name: \$REPORT_NAME"
+
+            zip -r "\$REPORT_NAME" "\$LATEST_RUN_DIR"
+
+            echo "✅ Zipped report created: \$REPORT_NAME"
           EOF
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
 
       - name: Copy Gatling Report from Load VM
         run: |
           scp -i ~/.ssh/load_vm_key \
-            ${{ secrets.LOAD_VM_USER }}@${{ secrets.LOAD_SERVER_IP }}:~/springboot-load/target/gatling-report.zip \
-            gatling-report.zip
+            ${{ secrets.LOAD_VM_USER }}@${{ secrets.LOAD_SERVER_IP }}:~/springboot-load/gatling-report-*.zip \
+            .
 
       - name: Upload Gatling HTML Report to GitHub
         uses: actions/upload-artifact@v4
         with:
-          name: gatling-html-report
-          path: gatling-report.zip
+          name: gatling-html-report-${{ github.run_number }}
+          path: gatling-report-*.zip
