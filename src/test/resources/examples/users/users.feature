@@ -4,8 +4,9 @@ Background:
   * url baseUrl
   * path '/api/products'
   * header Content-Type = 'application/json'
-  * def productSetup = callonce read('create-product.feature')
+  * def productSetup = call read('create-product.feature')
   * def productId = productSetup.productId
+
 
 Scenario: Get all products
   Given method get

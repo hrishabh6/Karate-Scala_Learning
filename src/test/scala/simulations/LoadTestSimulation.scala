@@ -7,19 +7,21 @@ import io.gatling.core.structure.ScenarioBuilder
 
 class LoadTestSimulation extends Simulation {
 
-  // Load the Karate feature file
-  val protocol: KarateProtocol = karateProtocol()
+  // ✅ Read baseUrl from -DbaseUrl passed via Maven
+  val baseUrl: String = System.getProperty("baseUrl", "http://localhost:8080")
 
-  // Scenario 1: Full CRUD flow in your feature
+  // ✅ Tell Karate to use THIS baseUrl
+  val protocol: KarateProtocol = karateProtocol(
+    "/api/products" -> Nil
+  )
+
   val crudTest: ScenarioBuilder = scenario("CRUD Operations Performance Test")
     .exec(karateFeature("classpath:examples/users/users.feature"))
 
-  // Simulation Setup
   setUp(
     crudTest.inject(
-      rampUsers(10).during(10),          // Slowly ramp 10 users over 10 sec
-      constantUsersPerSec(5).during(20) // Then keep 5 users/sec for 20 sec
+      rampUsers(10).during(10),
+      constantUsersPerSec(5).during(20)
     )
   ).protocols(protocol)
 }
-
