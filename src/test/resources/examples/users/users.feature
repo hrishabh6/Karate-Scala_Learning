@@ -1,15 +1,22 @@
-Feature: Test Product API - CRUD Operations (Load Safe)
+Feature: Test Product API - CRUD Operations (CI + Load Safe)
 
 Background:
   * url baseUrl
   * header Content-Type = 'application/json'
 
-  # ✅ Switch behavior based on environment
-  * def isLoad = karate.env == 'load'
-
+  # ✅ Detect load mode
+  * def isLoad = karate.properties['load'] == 'true'
+  * karate.log(isLoad ? '⚡ Load mode: per-user product' : '🧪 CI mode: shared product')
   * def productSetup =
-    isLoad ? call read('create-product.feature')
-           : callonce read('create-product.feature')
+  """
+  (function() {
+    if (isLoad) {
+      return karate.call('create-product.feature');
+    } else {
+      return karate.callSingle('create-product.feature'); // <-- CORRECTED
+    }
+  })()
+  """
 
   * def productId = productSetup.productId
 
@@ -20,6 +27,7 @@ Scenario: Get all products
   Then status 200
   And match response[*].id contains productId
 
+
 Scenario: Update product price
   * def updatedProduct = { name: 'Laptop', price: 1500.75 }
 
@@ -28,6 +36,7 @@ Scenario: Update product price
   When method put
   Then status 200
   And match response.price == 1500.75
+
 
 Scenario: Verify updated product
   Given path '/api/products', productId
