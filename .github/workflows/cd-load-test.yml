@@ -26,6 +26,12 @@ jobs:
             fi
 
             cd springboot-load
+
+            echo "🧹 Forcing clean Git state (CI-safe)"
+            git reset --hard
+            git clean -fd
+
+            echo "📥 Pulling latest code"
             git pull origin main
 
             echo "🚀 Running Gatling Load Test..."
@@ -34,15 +40,15 @@ jobs:
             echo "📦 Locating latest Gatling report..."
             LATEST_RUN_DIR=$(ls -td target/gatling/* | head -1)
 
-            TIMESTAMP=\$(date +"%Y-%m-%d_%H-%M-%S")
-            REPORT_NAME="gatling-report-\$TIMESTAMP.zip"
+            TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+            REPORT_NAME="gatling-report-$TIMESTAMP.zip"
 
-            echo "✅ Latest report directory: \$LATEST_RUN_DIR"
-            echo "✅ Report name: \$REPORT_NAME"
+            echo "✅ Latest report directory: $LATEST_RUN_DIR"
+            echo "✅ Report name: $REPORT_NAME"
 
-            zip -r "\$REPORT_NAME" "\$LATEST_RUN_DIR"
+            zip -r "$REPORT_NAME" "$LATEST_RUN_DIR"
 
-            echo "✅ Zipped report created: \$REPORT_NAME"
+            echo "✅ Zipped report created: $REPORT_NAME"
           EOF
         env:
           VM_HOST: ${{ secrets.VM_HOST }}
