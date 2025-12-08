@@ -1,1 +1,1 @@
-### Load testing with karate
+### Load testing with kaarate
